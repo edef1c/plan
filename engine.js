@@ -39,9 +39,11 @@ function apply(fn, args) { /* jshint validthis:true */
 }
 
 exports.zip = zip
-function zip(parameter, argument) { /* jshint validthis:true */
+function zip(parameter, argument, replace) { /* jshint validthis:true */
   if (is.Identifier(parameter))
-    this.set(parameter.name, argument)
+    (replace
+      ? this.replace
+      : this.set)(parameter.name, argument)
   else if (is.List(parameter) && is.List(argument)) {
     while (!is.Nil(parameter)) {
       zip.call(this, car(parameter), is.Nil(argument)
@@ -149,15 +151,11 @@ function newEnv() {
         }
       // definition
       , 'define': function define(ident, value) {
-          if (!is.Identifier(ident))
-            throw new TypeError('can only bind values to identifiers')
-          this.set(ident.name, this.eval(value))
+          zip.call(this, ident, this.eval(value))
         }
       // assignments
       , 'set!': function(ident, value) {
-          if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
-            throw new TypeError('can only bind values to identifiers')
-          this.replace(ident.name, this.eval(value))
+          zip.call(this, ident, this.eval(value), true)
         }
       // conditionals
       , 'if': function(expression, ifTrue, ifFalse) {
