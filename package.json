@@ -1,0 +1,31 @@
+{
+  "name": "plan",
+  "version": "0.0.0",
+  "description": "not much of a plan, more of a scheme",
+  "main": "index.js",
+  "bin": "cli.js",
+  "dependencies": {
+    "dict": "~1.4.0",
+    "protodict": "~1.0.0"
+  },
+  "devDependencies": {
+    "jison": "~0.4.13"
+  },
+  "scripts": {
+    "prepublish": "jison grammar.y"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/edef1c/plan.git"
+  },
+  "keywords": [
+    "scheme",
+    "intepreter"
+  ],
+  "author": "edef",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/edef1c/plan/issues"
+  },
+  "homepage": "https://github.com/edef1c/plan"
+}
