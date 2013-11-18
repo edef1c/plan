@@ -84,5 +84,20 @@ exports.Function = function Function(fn) {
   this.fn = fn
 }
 
+exports.Foreign = Foreign
+function Foreign(val) {
+  this.val = val
+}
+
+Foreign.of = function(val) {
+  return new Foreign(val)
+}
+
+Foreign.unwrap = function(obj) {
+  if (Object(obj).type !== 'Foreign')
+    throw new TypeError('not a foreign object')
+  return obj.val
+}
+
 for (var typeName in exports) if ({}.hasOwnProperty.call(exports, typeName))
   exports[typeName].prototype.type = typeName

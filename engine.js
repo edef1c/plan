@@ -8,6 +8,7 @@ var ProtoDict = require('protodict')
   , car = Cons.car
   , cdr = Cons.cdr
   , PFunction = types.Function
+  , Foreign = types.Foreign
   , init = require('./env.json')
 
 function createEnv(parent) {
@@ -81,7 +82,9 @@ function newEnv() {
           var expressions = [].slice.call(arguments, 2)
           return vau.call(this, parameters, envBinding, expressions)
         }
-      , 'create-env': createEnv
+      , 'create-env': lambda(function($env) {
+          return Foreign.wrap(createEnv(Foreign.unwrap($env)))
+        })
       , 'lambda': function hostLambda(parameters) {
           var expressions = [].slice.call(arguments, 1)
           return displayName(++i, lambda(vau.call(this, parameters, null, expressions)))
@@ -208,7 +211,8 @@ function newEnv() {
     if (typeof expression == 'number'
      || typeof expression == 'string'
      || is.Function(expression)
-     || is.Nil(expression))
+     || is.Nil(expression)
+     || is.Foreign(expression))
       return expression
     else if (is.Identifier(expression))
       if (this.has(expression.name))
@@ -221,6 +225,7 @@ function newEnv() {
       throw new TypeError('unknown expression type: ' + inspect(expression))
   }
 
+  env.set('env', Foreign.of(env))
   apply.call(env, env.eval, init)
 
   return env
