@@ -4,12 +4,12 @@
 %lex
 %%
 
-\s+                   /* skip whitespace */
-[0-9]+("."[0-9]+)?\b  return 'NUMBER'
-\"(?:{esc}["bfnrt/{esc}]|{esc}"u"[a-fA-F0-9]{4}|[^"{esc}])*\" yytext = yytext.substr(1,yyleng-2); return 'STRING'
-[^\s()]+              return 'IDENTIFIER'
+[0-9]+("."[0-9]+)?\b  return 'LITERAL'
+\"(?:[^"\\]*|\\["\\bfnrt\/]|\\u[0-9a-f]{4})*\" return 'LITERAL'
+[^\s()"]+             return 'IDENTIFIER'
 "("                   return '('
 ")"                   return ')'
+\s+                   /* skip whitespace */
 <<EOF>>               return 'EOF'
 
 /lex
@@ -28,12 +28,10 @@ program
 e
     : list
         {$$ = $1}
+    | LITERAL
+        {$$ = JSON.parse(yytext)}
     | IDENTIFIER
         {$$ = yy.Identifier.of(yytext)}
-    | STRING
-        {$$ = String(yytext)}
-    | NUMBER
-        {$$ = Number(yytext)}
     ;
 es
     :
