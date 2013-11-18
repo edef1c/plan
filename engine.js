@@ -70,7 +70,12 @@ function newEnv() {
   }
 
   var env = new Dict(
-      { 'vau': function hostVau(parameters, envBinding) {
+      // list processing
+      { 'car': car
+      , 'cdr': cdr
+      , 'null?': is.Nil
+      // funcy shit
+      , 'vau': function hostVau(parameters, envBinding) {
           var expressions = [].slice.call(arguments, 2)
           return vau.call(this, parameters, envBinding, expressions)
         }
