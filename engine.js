@@ -9,6 +9,12 @@ function createEnv(parent) {
   return env
 }
 
+function lambda(fn) {
+  return function() {
+    return fn.apply(this, [].map.call(arguments, this.eval, this))
+  }
+}
+
 module.exports = function() {
   var env = new Dict(
       { 'let': function(bindings) {
@@ -37,21 +43,21 @@ module.exports = function() {
             return Thunk.from(env, expressions)
           }
         }
-      , '+': function() {
+      , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
-        }
-      , '-': function(a, b) {
+        })
+      , '-': lambda(function(a, b) {
           if (arguments.length === 1)
             return -a
           else if (arguments.length === 1)
             return a - b
-        }
-      , '*': function() {
+        })
+      , '*': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a * b }, 1)
-        }
-      , '/': function(a, b) {
+        })
+      , '/': lambda(function(a, b) {
           return a / b
-        }
+        })
       })
 
   env.eval = function(expression) {
