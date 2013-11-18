@@ -124,31 +124,6 @@ function newEnv() {
           }, this)
           return Thunk.from(env, expressions)
         }
-      // dynamic binding
-      , 'fluid-let': function(bindings) {
-          var env = this
-            , expressions = [].slice.call(arguments, 1)
-            , save = new Dict()
-            , none = {}
-          bindings.forEach(function(binding) {
-            var ident = binding[0]
-              , value = this.eval(binding[1])
-            if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
-              throw new TypeError('can only bind values to identifiers')
-            save.set(ident.name, this.has(ident.name)
-              ? this.get(ident.name)
-              : none)
-            this.set(ident.name, value)
-          }, this)
-          return Thunk.from(this, expressions, function() {
-            save.forEach(function(value, name) {
-              if (value === none)
-                this.delete(name)
-              else
-                this.set(name, value)
-            }, this)
-          })
-        }
       // definition
       , 'define': function define(ident, value) {
           zip.call(this, ident, this.eval(value))
