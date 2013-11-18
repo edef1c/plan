@@ -17,19 +17,7 @@ function lambda(fn) {
 
 module.exports = function() {
   var env = new Dict(
-      { 'let': function(bindings) {
-          var env = createEnv(this)
-            , expressions = [].slice.call(arguments, 1)
-          bindings.forEach(function(binding) {
-            var ident = binding[0]
-              , value = this.eval(binding[1])
-            if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
-              throw new TypeError('can only bind values to identifiers')
-            env.set(ident.name, value)
-          }, this)
-          return Thunk.from(env, expressions)
-        }
-      , 'lambda': function(parameters) {
+      { 'lambda': function(parameters) {
           var expressions = [].slice.call(arguments, 1)
             , definitionEnv = this
           return function() {
@@ -43,6 +31,20 @@ module.exports = function() {
             return Thunk.from(env, expressions)
           }
         }
+      // lexical binding
+      , 'let': function(bindings) {
+          var env = createEnv(this)
+            , expressions = [].slice.call(arguments, 1)
+          bindings.forEach(function(binding) {
+            var ident = binding[0]
+              , value = this.eval(binding[1])
+            if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
+              throw new TypeError('can only bind values to identifiers')
+            env.set(ident.name, value)
+          }, this)
+          return Thunk.from(env, expressions)
+        }
+      // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
         })
