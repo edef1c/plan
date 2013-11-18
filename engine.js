@@ -119,6 +119,18 @@ function newEnv() {
             ? ifTrue
             : ifFalse)
         }
+      , 'cond': function() {
+          var clauses = [].slice.call(arguments)
+            , len = clauses.length
+          for (var i = 0; i < len; i++) {
+            var clause = clauses[i]
+              , condition = clause[0]
+              , expression = clause[1]
+            if (this.eval(condition))
+              return this.eval(expression)
+          }
+        }
+      , 'else': true
       // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
