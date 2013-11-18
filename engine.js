@@ -103,6 +103,12 @@ function newEnv() {
             throw new TypeError('can only bind values to identifiers')
           this.set(ident.name, this.eval(value))
         }
+      // assignments
+      , 'set!': function(ident, value) {
+          if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
+            throw new TypeError('can only bind values to identifiers')
+          this.replace(ident.name, this.eval(value))
+        }
       // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)

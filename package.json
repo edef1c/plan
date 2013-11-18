@@ -6,7 +6,7 @@
   "bin": "cli.js",
   "dependencies": {
     "dict": "~1.4.0",
-    "protodict": "~1.0.0"
+    "protodict": "~2.1.0"
   },
   "devDependencies": {
     "jison": "~0.4.13"
