@@ -1,3 +1,2 @@
-(let
-  ((x (lambda (x) x)))
-  (x x))
+(define f (lambda (x) 0 x))
+(f f)

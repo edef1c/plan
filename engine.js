@@ -7,6 +7,7 @@ var ProtoDict = require('protodict')
   , Cons = types.Cons
   , car = Cons.car
   , cdr = Cons.cdr
+  , PFunction = types.Function
 
 function createEnv(parent) {
   var env = new ProtoDict(parent)
@@ -17,47 +18,58 @@ function createEnv(parent) {
 module.exports = exports = newEnv
 exports.lambda = lambda
 
+var i = 0
+
+function displayName(name, fn) {
+  fn.displayName = (fn.displayName || fn.name || '') + name
+  return fn
+}
+
 function lambda(fn) {
-  return function() {
-    return fn.apply(this, [].map.call(arguments, function(item) { return this.eval(item) }, this))
-  }
+  return displayName('lambda_' + (fn.displayName || fn.name || i++), function() {
+    return apply.call(this, fn, [].map.call(arguments, function(item) { return this.eval(item) }, this))
+  })
+}
+
+function apply(fn, args) { /* jshint validthis:true */
+  if (is.PFunction(fn))
+    return fn.fn.call(this, args)
+  return fn.apply(this, args)
 }
 
 function zip(parameter, argument) { /* jshint validthis:true */
-  while (parameter !== null) {
-    if (is.Identifier(parameter)) {
-      this.set(parameter.name, argument)
-      parameter = null
-    }
-    else if (is.List(parameter)) {
-      if (!is.List(argument))
-        throw new TypeError('failed destructuring')
+  if (is.Identifier(parameter))
+    this.set(parameter.name, argument)
+  else if (is.List(parameter) && is.List(argument)) {
+    while (!is.Nil(parameter)) {
       zip.call(this, car(parameter), car(argument))
       parameter = cdr(parameter)
       argument = cdr(argument)
     }
-    else
-      throw new TypeError('invalid pattern')
   }
+  else
+    throw new TypeError('invalid pattern')
 }
 
-var begin = lambda(function() { return arguments[arguments.length - 1] })
+var begin = lambda(function begin() { return arguments[arguments.length - 1] })
 
 function newEnv() {
-  function vau(parameters) { /*jshint validthis:true */
-    var expressions = [].slice.call(arguments, 1)
-      , definitionEnv = this
-    return function() {
+  function vau(parameters, envBinding, expressions) { /*jshint validthis:true */
+    var definitionEnv = this
+    return new PFunction(function vau_(args) {
       var env = createEnv(definitionEnv)
-      zip.call(env, parameters, arguments)
+      zip.call(env, parameters, args)
       return Thunk.from(env, expressions)
-    }
+    })
   }
 
   var env = new Dict(
-      { 'vau': vau
-      , 'lambda': function(parameters) {
-          return lambda(vau.apply(this, arguments))
+      { 'vau': function hostVau(parameters, envBinding) {
+          return apply.call(this, vau, arguments)
+        }
+      , 'lambda': function hostLambda(parameters) {
+          var expressions = [].slice.call(arguments, 1)
+          return displayName(++i, lambda(vau.call(this, parameters, null, expressions)))
         }
       // lexical binding
       , 'let': function(bindings) {
@@ -123,8 +135,8 @@ function newEnv() {
           })
         }
       // definition
-      , 'define': function(ident, value) {
-          if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
+      , 'define': function define(ident, value) {
+          if (!is.Identifier(ident))
             throw new TypeError('can only bind values to identifiers')
           this.set(ident.name, this.eval(value))
         }
@@ -221,8 +233,8 @@ function newEnv() {
         return this.get(expression.name)
       else
         throw new ReferenceError(expression.name + ' is not defined')
-    else if (Array.isArray(expression))
-      return this.eval(expression[0]).apply(this, expression.slice(1))
+    else if (is.List(expression) && (expression = Cons.toArray(expression)))
+      return apply.call(this, this.eval(expression[0]), expression.slice(1))
     else
       throw new TypeError('unknown expression type: ' + inspect(expression))
   }

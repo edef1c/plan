@@ -25,9 +25,10 @@ Cons.from = function(val) {
     throw new TypeError("can't make a list from that")
 }
 
-Cons.toArray = function() {
+Cons.toArray = function(cons) {
+  if (cons && typeof cons.length == 'number')
+    return [].slice.call(cons)
   var ret = []
-    , cons = this
   while (cons !== null) {
     if (!(cons instanceof Cons))
       throw new TypeError("can't make an array from that")
@@ -77,6 +78,10 @@ function Identifier(name) {
 Identifier.of = function(name) { return new Identifier(name) }
 Identifier.prototype.inspect = function() {
   return '[Identifier ' + this.name + ']'
+}
+
+exports.Function = function Function(fn) {
+  this.fn = fn
 }
 
 for (var typeName in exports) if ({}.hasOwnProperty.call(typeName, exports))

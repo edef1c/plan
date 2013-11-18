@@ -19,3 +19,15 @@ is.List = function(val) {
   return typeof Object(val).length == 'number'
       || is.Cons(val)
 }
+
+is.Nil = function(val) {
+  return val === null
+      || (typeof Object(val).length === 0)
+}
+
+is.PFunction = is.Function
+
+is.Function = function(val) {
+  return typeof val == 'function'
+      || is.PFunction(val)
+}
