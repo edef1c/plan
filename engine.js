@@ -150,8 +150,13 @@ module.exports = function() {
   }
 
   function _eval(expression) { /*jshint validthis:true*/
-    if (arguments.length > 1)
-      return [].reduce.call(arguments, function(acc, expression) { return this.evaluate(expression) }, null, this)
+    if (arguments.length > 1) {
+      var value
+      [].forEach.call(arguments, function(expression) {
+        this.eval(expression)
+      }, this)
+      return value
+    }
     else if (typeof expression == 'number'
           || typeof expression == 'string'
           || typeof expression == 'function'
