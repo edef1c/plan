@@ -18,6 +18,8 @@ function lambda(fn) {
   }
 }
 
+var begin = lambda(function() { return arguments[arguments.length - 1] })
+
 function newEnv() {
   var env = new Dict(
       { 'lambda': function(parameters) {
@@ -132,9 +134,7 @@ function newEnv() {
         }
       , 'else': true
       // sequencing
-      , 'begin': lambda(function() {
-          return arguments[arguments.length - 1]
-        })
+      , 'begin': begin
       // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
@@ -161,24 +161,27 @@ function newEnv() {
   }
 
   Thunk.prototype.type = 'Thunk'
-  function Thunk(env, expressions, post) {
+  function Thunk(env, expression, post) {
     this.env = env
-    this.expressions = expressions
+    this.expression = expression
     this.post = typeof post == 'function'
       ? post
       : null
   }
 
   Thunk.of = function(env, expression, post) {
-    return new Thunk(env, [expression], post)
+    return new Thunk(env, expression, post)
   }
 
   Thunk.from = function(env, expressions, post) {
-    return new Thunk(env, [].slice.call(expressions), post)
+    return new Thunk(env, expressions.length > 1
+      ? [begin].concat([].slice.call(expressions))
+      : expressions[0]
+      , post)
   }
 
   Thunk.prototype.resolve = function() {
-    var ret = _eval.apply(this.env, this.expressions)
+    var ret = _eval.call(this.env, this.expression)
     if (typeof this.post == 'function')
       this.post.call(this.env)
     return ret
