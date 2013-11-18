@@ -8,7 +8,7 @@ var file = process.argv[2]
   , code = plan.parse(text)
   , env = plan.createEnv()
 
-env.set('log', console.log.bind(console))
+env.set('log', plan.lambda(console.log.bind(console)))
 
 var result = env.eval.apply(env, code)
 

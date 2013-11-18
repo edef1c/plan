@@ -9,13 +9,16 @@ function createEnv(parent) {
   return env
 }
 
+module.exports = exports = newEnv
+exports.lambda = lambda
+
 function lambda(fn) {
   return function() {
-    return fn.apply(this, [].map.call(arguments, this.eval, this))
+    return fn.apply(this, [].map.call(arguments, function(item) { return this.eval(item) }, this))
   }
 }
 
-module.exports = function() {
+function newEnv() {
   var env = new Dict(
       { 'lambda': function(parameters) {
           var expressions = [].slice.call(arguments, 1)
