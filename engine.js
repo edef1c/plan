@@ -188,17 +188,10 @@ function newEnv() {
   }
 
   function _eval(expression) { /*jshint validthis:true*/
-    if (arguments.length > 1) {
-      var value
-      [].forEach.call(arguments, function(expression) {
-        this.eval(expression)
-      }, this)
-      return value
-    }
-    else if (typeof expression == 'number'
-          || typeof expression == 'string'
-          || typeof expression == 'function'
-          || expression === null)
+    if (typeof expression == 'number'
+     || typeof expression == 'string'
+     || typeof expression == 'function'
+     || expression === null)
       return expression
     else if (typeof expression == 'object' && expression.type === 'Identifier')
       if (this.has(expression.name))
