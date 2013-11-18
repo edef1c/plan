@@ -9,7 +9,8 @@ var ProtoDict = require('protodict')
   , cdr = Cons.cdr
   , PFunction = types.Function
   , Foreign = types.Foreign
-  , init = require('./env.json')
+  , fs = require('fs')
+  , init = require('./parser').parse(fs.readFileSync(require.resolve('./env.plan')).toString())
 
 function createEnv(parent) {
   var env = new ProtoDict(parent)
