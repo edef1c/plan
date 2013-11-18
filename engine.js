@@ -109,6 +109,10 @@ function newEnv() {
             throw new TypeError('can only bind values to identifiers')
           this.replace(ident.name, this.eval(value))
         }
+      // quoting
+      , 'quote': function(expression) {
+          return expression
+        }
       // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
