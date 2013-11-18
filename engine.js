@@ -44,6 +44,19 @@ module.exports = function() {
           }, this)
           return Thunk.from(env, expressions)
         }
+      , 'let*': function(bindings) {
+          var env = this
+            , expressions = [].slice.call(arguments, 1)
+          bindings.forEach(function(binding) {
+            env = createEnv(env)
+            var ident = binding[0]
+              , value = env.eval(binding[1])
+            if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
+              throw new TypeError('can only bind values to identifiers')
+            env.set(ident.name, value)
+          }, this)
+          return Thunk.from(env, expressions)
+        }
       // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
