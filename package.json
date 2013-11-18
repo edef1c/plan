@@ -12,7 +12,8 @@
     "jison": "~0.4.13"
   },
   "scripts": {
-    "prepublish": "jison grammar.y && node preparse.js env.plan"
+    "prepublish": "jison grammar.y && node preparse.js env.plan",
+    "unbuild": "rm -f grammar.js env.json"
   },
   "repository": {
     "type": "git",
