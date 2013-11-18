@@ -25,16 +25,16 @@ function newEnv() {
       { 'lambda': function(parameters) {
           var expressions = [].slice.call(arguments, 1)
             , definitionEnv = this
-          return function() {
+          return lambda(function() {
             var env = createEnv(definitionEnv)
               , args = arguments
             parameters.forEach(function(parameter, i) {
               if (typeof parameter !== 'object' || !parameter || parameter.type !== 'Identifier')
                 throw new TypeError('can only bind arguments to identifiers')
-              env.set(parameter.name, this.eval(args[i]))
+              env.set(parameter.name, args[i])
             }, this)
             return Thunk.from(env, expressions)
-          }
+          })
         }
       // lexical binding
       , 'let': function(bindings) {
