@@ -3,6 +3,10 @@ var ProtoDict = require('protodict')
   , Dict = require('dict')
   , inspect = require('util').inspect
   , is = require('./is')
+  , types = require('./types')
+  , Cons = types.Cons
+  , car = Cons.car
+  , cdr = Cons.cdr
 
 function createEnv(parent) {
   var env = new ProtoDict(parent)
@@ -19,6 +23,24 @@ function lambda(fn) {
   }
 }
 
+function zip(parameter, argument) { /* jshint validthis:true */
+  while (parameter !== null) {
+    if (is.Identifier(parameter)) {
+      this.set(parameter.name, argument)
+      parameter = null
+    }
+    else if (is.List(parameter)) {
+      if (!is.List(argument))
+        throw new TypeError('failed destructuring')
+      zip.call(this, car(parameter), car(argument))
+      parameter = cdr(parameter)
+      argument = cdr(argument)
+    }
+    else
+      throw new TypeError('invalid pattern')
+  }
+}
+
 var begin = lambda(function() { return arguments[arguments.length - 1] })
 
 function newEnv() {
@@ -27,12 +49,7 @@ function newEnv() {
       , definitionEnv = this
     return function() {
       var env = createEnv(definitionEnv)
-        , args = arguments
-      parameters.forEach(function(parameter, i) {
-        if (typeof parameter !== 'object' || !parameter || parameter.type !== 'Identifier')
-          throw new TypeError('can only bind arguments to identifiers')
-        env.set(parameter.name, args[i])
-      }, this)
+      zip.call(env, parameters, arguments)
       return Thunk.from(env, expressions)
     }
   }
