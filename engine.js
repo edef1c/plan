@@ -21,20 +21,25 @@ function lambda(fn) {
 var begin = lambda(function() { return arguments[arguments.length - 1] })
 
 function newEnv() {
+  function vau(parameters) { /*jshint validthis:true */
+    var expressions = [].slice.call(arguments, 1)
+      , definitionEnv = this
+    return function() {
+      var env = createEnv(definitionEnv)
+        , args = arguments
+      parameters.forEach(function(parameter, i) {
+        if (typeof parameter !== 'object' || !parameter || parameter.type !== 'Identifier')
+          throw new TypeError('can only bind arguments to identifiers')
+        env.set(parameter.name, args[i])
+      }, this)
+      return Thunk.from(env, expressions)
+    }
+  }
+
   var env = new Dict(
-      { 'lambda': function(parameters) {
-          var expressions = [].slice.call(arguments, 1)
-            , definitionEnv = this
-          return lambda(function() {
-            var env = createEnv(definitionEnv)
-              , args = arguments
-            parameters.forEach(function(parameter, i) {
-              if (typeof parameter !== 'object' || !parameter || parameter.type !== 'Identifier')
-                throw new TypeError('can only bind arguments to identifiers')
-              env.set(parameter.name, args[i])
-            }, this)
-            return Thunk.from(env, expressions)
-          })
+      { 'vau': vau
+      , 'lambda': function(parameters) {
+          return lambda(vau.apply(this, arguments))
         }
       // lexical binding
       , 'let': function(bindings) {
