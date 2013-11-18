@@ -22,7 +22,7 @@ is.List = function(val) {
 
 is.Nil = function(val) {
   return val === null
-      || (typeof Object(val).length === 0)
+      || Object(val).length === 0
 }
 
 is.PFunction = is.Function

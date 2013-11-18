@@ -8,6 +8,7 @@ var ProtoDict = require('protodict')
   , car = Cons.car
   , cdr = Cons.cdr
   , PFunction = types.Function
+  , init = require('./env.json')
 
 function createEnv(parent) {
   var env = new ProtoDict(parent)
@@ -37,18 +38,23 @@ function apply(fn, args) { /* jshint validthis:true */
   return fn.apply(this, args)
 }
 
+exports.zip = zip
 function zip(parameter, argument) { /* jshint validthis:true */
   if (is.Identifier(parameter))
     this.set(parameter.name, argument)
   else if (is.List(parameter) && is.List(argument)) {
     while (!is.Nil(parameter)) {
-      zip.call(this, car(parameter), car(argument))
+      zip.call(this, car(parameter), is.Nil(argument)
+        ? null
+        : car(argument))
       parameter = cdr(parameter)
-      argument = cdr(argument)
+      argument = is.Nil(argument)
+        ? null
+        : cdr(argument)
     }
   }
   else
-    throw new TypeError('invalid pattern')
+    throw new TypeError('invalid pattern: ' + inspect(parameter) + ' :: ' + inspect(argument))
 }
 
 var begin = lambda(function begin() { return arguments[arguments.length - 1] })
@@ -65,8 +71,10 @@ function newEnv() {
 
   var env = new Dict(
       { 'vau': function hostVau(parameters, envBinding) {
-          return apply.call(this, vau, arguments)
+          var expressions = [].slice.call(arguments, 2)
+          return vau.call(this, parameters, envBinding, expressions)
         }
+      , 'create-env': createEnv
       , 'lambda': function hostLambda(parameters) {
           var expressions = [].slice.call(arguments, 1)
           return displayName(++i, lambda(vau.call(this, parameters, null, expressions)))
@@ -146,10 +154,6 @@ function newEnv() {
             throw new TypeError('can only bind values to identifiers')
           this.replace(ident.name, this.eval(value))
         }
-      // quoting
-      , 'quote': function(expression) {
-          return expression
-        }
       // conditionals
       , 'if': function(expression, ifTrue, ifFalse) {
           return this.eval(this.eval(expression)
@@ -225,8 +229,8 @@ function newEnv() {
   function _eval(expression) { /*jshint validthis:true*/
     if (typeof expression == 'number'
      || typeof expression == 'string'
-     || typeof expression == 'function'
-     || expression === null)
+     || is.Function(expression)
+     || is.Nil(expression))
       return expression
     else if (is.Identifier(expression))
       if (this.has(expression.name))
@@ -238,6 +242,8 @@ function newEnv() {
     else
       throw new TypeError('unknown expression type: ' + inspect(expression))
   }
+
+  apply.call(env, env.eval, init)
 
   return env
 }
