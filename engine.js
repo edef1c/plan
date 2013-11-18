@@ -131,6 +131,10 @@ function newEnv() {
           }
         }
       , 'else': true
+      // sequencing
+      , 'begin': lambda(function() {
+          return arguments[arguments.length - 1]
+        })
       // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
