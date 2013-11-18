@@ -21,7 +21,7 @@ module.exports = function() {
               throw new TypeError('can only bind values to identifiers')
             env.set(ident.name, value)
           }, this)
-          return env.eval.apply(env, expressions)
+          return Thunk.from(env, expressions)
         }
       , 'lambda': function(parameters) {
           var expressions = [].slice.call(arguments, 1)
@@ -34,7 +34,7 @@ module.exports = function() {
                 throw new TypeError('can only bind arguments to identifiers')
               env.set(parameter.name, this.eval(args[i]))
             }, this)
-            return env.eval.apply(env, expressions)
+            return Thunk.from(env, expressions)
           }
         }
       , '+': function() {
@@ -55,6 +55,31 @@ module.exports = function() {
       })
 
   env.eval = function(expression) {
+    var ret = Thunk.from(this, arguments)
+    while (ret instanceof Thunk)
+      ret = ret.resolve()
+    return ret
+  }
+
+  Thunk.prototype.type = 'Thunk'
+  function Thunk(env, expressions) {
+    this.env = env
+    this.expressions = expressions
+  }
+
+  Thunk.of = function(env, expression) {
+    return new Thunk(env, [expression])
+  }
+
+  Thunk.from = function(env, expressions) {
+    return new Thunk(env, [].slice.call(expressions))
+  }
+
+  Thunk.prototype.resolve = function() {
+    return _eval.apply(this.env, this.expressions)
+  }
+
+  function _eval(expression) { /*jshint validthis:true*/
     if (arguments.length > 1)
       return [].reduce.call(arguments, function(acc, expression) { return this.evaluate(expression) }, null, this)
     else if (typeof expression == 'number'
