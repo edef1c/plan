@@ -82,12 +82,16 @@ function newEnv() {
           var expressions = [].slice.call(arguments, 2)
           return vau.call(this, parameters, envBinding, expressions)
         }
-      , 'create-env': lambda(function($env) {
-          return Foreign.wrap(createEnv(Foreign.unwrap($env)))
-        })
       , 'lambda': function hostLambda(parameters) {
           var expressions = [].slice.call(arguments, 1)
           return displayName(++i, lambda(vau.call(this, parameters, null, expressions)))
+        }
+      // environment
+      , 'create-env': lambda(function($env) {
+          return Foreign.wrap(createEnv(Foreign.unwrap($env)))
+        })
+      , 'set-env!': function($env, binding, value) {
+          zip.call(Foreign.unwrap(this.eval($env)), binding, this.eval(value))
         }
       // lexical binding
       , 'let': function(bindings) {
