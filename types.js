@@ -84,5 +84,5 @@ exports.Function = function Function(fn) {
   this.fn = fn
 }
 
-for (var typeName in exports) if ({}.hasOwnProperty.call(typeName, exports))
-  exports[typeName].prototype.name = typeName
+for (var typeName in exports) if ({}.hasOwnProperty.call(exports, typeName))
+  exports[typeName].prototype.type = typeName
