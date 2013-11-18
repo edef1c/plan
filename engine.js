@@ -71,21 +71,21 @@ module.exports = function() {
         }
       // dynamic binding
       , 'fluid-let': function(bindings) {
-          var env = createEnv(this)
+          var env = this
             , expressions = [].slice.call(arguments, 1)
             , save = new Dict()
             , none = {}
           bindings.forEach(function(binding) {
             var ident = binding[0]
-              , value = env.eval(binding[1])
+              , value = this.eval(binding[1])
             if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
               throw new TypeError('can only bind values to identifiers')
-            save.set(ident.name, env.has(ident.name)
-              ? env.get(ident.name)
+            save.set(ident.name, this.has(ident.name)
+              ? this.get(ident.name)
               : none)
-            env.set(ident.name, value)
+            this.set(ident.name, value)
           }, this)
-          return Thunk.from(env, expressions, function() {
+          return Thunk.from(this, expressions, function() {
             save.forEach(function(value, name) {
               if (value === none)
                 this.delete(name)
@@ -98,7 +98,7 @@ module.exports = function() {
       , 'define': function(ident, value) {
           if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
             throw new TypeError('can only bind values to identifiers')
-          this.set(ident.name, value)
+          this.set(ident.name, this.eval(value))
         }
       // basic arithmetic functions
       , '+': lambda(function() {
