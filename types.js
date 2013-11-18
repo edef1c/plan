@@ -43,7 +43,9 @@ function Identifier(name) {
 }
 
 Identifier.of = function(name) { return new Identifier(name) }
-Identifier.prototype.type = 'Identifier'
 Identifier.prototype.inspect = function() {
   return '[Identifier ' + this.name + ']'
 }
+
+for (var typeName in exports) if ({}.hasOwnProperty.call(typeName, exports))
+  exports[typeName].prototype.name = typeName

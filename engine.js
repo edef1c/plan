@@ -2,6 +2,7 @@
 var ProtoDict = require('protodict')
   , Dict = require('dict')
   , inspect = require('util').inspect
+  , is = require('./is')
 
 function createEnv(parent) {
   var env = new ProtoDict(parent)
@@ -48,7 +49,7 @@ function newEnv() {
           bindings.forEach(function(binding) {
             var ident = binding[0]
               , value = this.eval(binding[1])
-            if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
+            if (!is.Identifier(ident))
               throw new TypeError('can only bind values to identifiers')
             env.set(ident.name, value)
           }, this)
@@ -61,7 +62,7 @@ function newEnv() {
             env = createEnv(env)
             var ident = binding[0]
               , value = env.eval(binding[1])
-            if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
+            if (!is.Identifier(ident))
               throw new TypeError('can only bind values to identifiers')
             env.set(ident.name, value)
           }, this)
@@ -73,7 +74,7 @@ function newEnv() {
           bindings.forEach(function(binding) {
             var ident = binding[0]
               , value = env.eval(binding[1])
-            if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
+            if (!is.Identifier(ident))
               throw new TypeError('can only bind values to identifiers')
             env.set(ident.name, value)
           }, this)
@@ -198,7 +199,7 @@ function newEnv() {
      || typeof expression == 'function'
      || expression === null)
       return expression
-    else if (typeof expression == 'object' && expression.type === 'Identifier')
+    else if (is.Identifier(expression))
       if (this.has(expression.name))
         return this.get(expression.name)
       else
