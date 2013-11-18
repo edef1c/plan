@@ -37,6 +37,38 @@ Cons.toArray = function() {
   return ret
 }
 
+Cons.car = function(val) {
+  if (val === null)
+    throw new TypeError('attempt to get car out of nil')
+  if (val instanceof Cons)
+    return val.car
+  else if (typeof Object(val).length == 'number') {
+    if (val.length !== 0)
+      return val[0]
+    else
+      throw new TypeError('attempt to get car out of nil')
+  }
+  else
+    throw new TypeError('attempt to get car on non-cons')
+}
+
+Cons.cdr = function(val) {
+  if (val === null)
+    throw new TypeError('attempt to get cdr out of nil')
+  if (val instanceof Cons)
+    return val.cdr
+  else if (typeof Object(val).length == 'number') {
+    if (val.length === 1)
+      return null
+    else if (val.length > 1)
+      return Cons.from([].slice.call(val, 1))
+    else
+      throw new TypeError('attempt to get cdr out of nil')
+  }
+  else
+    throw new TypeError('attempt to get cdr on non-cons')
+}
+
 exports.Identifier = Identifier
 function Identifier(name) {
   this.name = name
