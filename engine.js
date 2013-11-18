@@ -54,7 +54,7 @@ module.exports = function() {
         }
       })
 
-  env.eval = function(expression) { /* jshint validthis:true */
+  env.eval = function(expression) {
     if (arguments.length > 1)
       return [].reduce.call(arguments, function(acc, expression) { return this.evaluate(expression) }, null, this)
     else if (typeof expression == 'number'
