@@ -69,6 +69,31 @@ module.exports = function() {
           }, this)
           return Thunk.from(env, expressions)
         }
+      // dynamic binding
+      , 'fluid-let': function(bindings) {
+          var env = createEnv(this)
+            , expressions = [].slice.call(arguments, 1)
+            , save = new Dict()
+            , none = {}
+          bindings.forEach(function(binding) {
+            var ident = binding[0]
+              , value = env.eval(binding[1])
+            if (typeof ident !== 'object' || !ident || ident.type !== 'Identifier')
+              throw new TypeError('can only bind values to identifiers')
+            save.set(ident.name, env.has(ident.name)
+              ? env.get(ident.name)
+              : none)
+            env.set(ident.name, value)
+          }, this)
+          return Thunk.from(env, expressions, function() {
+            save.forEach(function(value, name) {
+              if (value === none)
+                this.delete(name)
+              else
+                this.set(name, value)
+            }, this)
+          })
+        }
       // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
@@ -95,21 +120,27 @@ module.exports = function() {
   }
 
   Thunk.prototype.type = 'Thunk'
-  function Thunk(env, expressions) {
+  function Thunk(env, expressions, post) {
     this.env = env
     this.expressions = expressions
+    this.post = typeof post == 'function'
+      ? post
+      : null
   }
 
-  Thunk.of = function(env, expression) {
-    return new Thunk(env, [expression])
+  Thunk.of = function(env, expression, post) {
+    return new Thunk(env, [expression], post)
   }
 
-  Thunk.from = function(env, expressions) {
-    return new Thunk(env, [].slice.call(expressions))
+  Thunk.from = function(env, expressions, post) {
+    return new Thunk(env, [].slice.call(expressions), post)
   }
 
   Thunk.prototype.resolve = function() {
-    return _eval.apply(this.env, this.expressions)
+    var ret = _eval.apply(this.env, this.expressions)
+    if (typeof this.post == 'function')
+      this.post.call(this.env)
+    return ret
   }
 
   function _eval(expression) { /*jshint validthis:true*/
