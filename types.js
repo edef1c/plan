@@ -15,7 +15,7 @@ Cons.from = function(val) {
     return null
   else if (val instanceof Cons)
     return val
-  else if (Array.isArray(val)) {
+  else if (val && typeof val.length == 'number') {
     var cons = null
     for (var i = val.length - 1; i >=0; i--)
       cons = Cons.of(val[i], cons)
