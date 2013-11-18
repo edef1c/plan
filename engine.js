@@ -113,6 +113,12 @@ function newEnv() {
       , 'quote': function(expression) {
           return expression
         }
+      // conditionals
+      , 'if': function(expression, ifTrue, ifFalse) {
+          return this.eval(this.eval(expression)
+            ? ifTrue
+            : ifFalse)
+        }
       // basic arithmetic functions
       , '+': lambda(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
