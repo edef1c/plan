@@ -11,7 +11,7 @@ var env = plan.createEnv()
   , text = fs.readFileSync(file).toString()
   , code = plan.parse(text)
 
-env.set('log', plan.lambda(console.log.bind(console)))
+env.set('log', plan.wrap(console.log.bind(console)))
 
 var result = plan.operate.call(env, env.eval, code)
 

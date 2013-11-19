@@ -19,7 +19,7 @@ function createEnv(parent) {
 }
 
 module.exports = exports = newEnv
-exports.lambda = lambda
+exports.wrap = wrap
 
 var i = 0
 
@@ -28,8 +28,8 @@ function displayName(name, fn) {
   return fn
 }
 
-function lambda(fn) {
-  return displayName('lambda_' + (fn.displayName || fn.name || i++), function() {
+function wrap(fn) {
+  return displayName('wrapped_' + (fn.displayName || fn.name || i++), function() {
     return operate.call(this, fn, [].map.call(arguments, function(item) { return this.eval(item) }, this))
   })
 }
@@ -65,7 +65,7 @@ function zip(parameter, argument, replace) { /* jshint validthis:true */
     throw new TypeError('invalid pattern: ' + inspect(parameter) + ' :: ' + inspect(argument))
 }
 
-var begin = lambda(function begin() { return arguments[arguments.length - 1] })
+var begin = wrap(function begin() { return arguments[arguments.length - 1] })
 
 function newEnv() {
   function vau(parameters, envBinding, expressions) { /*jshint validthis:true */
@@ -89,23 +89,23 @@ function newEnv() {
         }
       , 'lambda': function hostLambda(parameters) {
           var expressions = [].slice.call(arguments, 1)
-          return displayName(++i, lambda(vau.call(this, parameters, null, expressions)))
+          return displayName(++i, wrap(vau.call(this, parameters, null, expressions)))
         }
       // environment
       , 'eval': function(expression, $env) {
           return Foreign.unwrap(this.eval($env)).eval(expression)
         }
-      , 'operate': lambda(function($env, operative, operands) {
+      , 'operate': wrap(function($env, operative, operands) {
           return operate.call(Foreign.unwrap(env), operative, operands)
         })
-      , 'create-env': lambda(function($env) {
+      , 'create-env': wrap(function($env) {
           return Foreign.wrap(createEnv(Foreign.unwrap($env)))
         })
       , 'set-env!': function($env, binding, value) {
           zip.call(Foreign.unwrap(this.eval($env)), binding, this.eval(value))
         }
       // error reporting
-      , 'error': lambda(function(error) {
+      , 'error': wrap(function(error) {
           throw new Error(error)
         })
       // lexical binding
@@ -169,19 +169,19 @@ function newEnv() {
       // sequencing
       , 'begin': begin
       // basic arithmetic functions
-      , '+': lambda(function() {
+      , '+': wrap(function() {
           return [].reduce.call(arguments, function(a, b) { return a + b }, 0)
         })
-      , '-': lambda(function(a, b) {
+      , '-': wrap(function(a, b) {
           if (arguments.length === 1)
             return -a
           else if (arguments.length === 1)
             return a - b
         })
-      , '*': lambda(function() {
+      , '*': wrap(function() {
           return [].reduce.call(arguments, function(a, b) { return a * b }, 1)
         })
-      , '/': lambda(function(a, b) {
+      , '/': wrap(function(a, b) {
           return a / b
         })
       })
