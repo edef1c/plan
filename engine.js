@@ -103,38 +103,32 @@ function newEnv() {
       , 'let': function(bindings) {
           var env = createEnv(this)
             , expressions = [].slice.call(arguments, 1)
-          bindings.forEach(function(binding) {
-            var ident = binding[0]
-              , value = this.eval(binding[1])
-            if (!is.Identifier(ident))
-              throw new TypeError('can only bind values to identifiers')
-            env.set(ident.name, value)
-          }, this)
+          Cons.forEach.call(this, bindings, function(binding) {
+            var ident = car(binding)
+              , value = createEnv(this).eval(car(cdr(binding)))
+            zip.call(env, ident, value)
+          })
           return Thunk.from(env, expressions)
         }
       , 'let*': function(bindings) {
           var env = this
             , expressions = [].slice.call(arguments, 1)
-          bindings.forEach(function(binding) {
+          Cons.forEach.call(this, bindings, function(binding) {
             env = createEnv(env)
-            var ident = binding[0]
-              , value = env.eval(binding[1])
-            if (!is.Identifier(ident))
-              throw new TypeError('can only bind values to identifiers')
-            env.set(ident.name, value)
-          }, this)
+            var ident = car(binding)
+              , value = this.eval(car(cdr(binding)))
+            zip.call(env, ident, value)
+          })
           return Thunk.from(env, expressions)
         }
       , 'letrec': function(bindings) {
           var env = createEnv(this)
             , expressions = [].slice.call(arguments, 1)
-          bindings.forEach(function(binding) {
-            var ident = binding[0]
-              , value = env.eval(binding[1])
-            if (!is.Identifier(ident))
-              throw new TypeError('can only bind values to identifiers')
-            env.set(ident.name, value)
-          }, this)
+          Cons.forEach.call(this, bindings, function(binding) {
+            var ident = car(binding)
+              , value = this.eval(car(cdr(binding)))
+            zip.call(env, ident, value)
+          })
           return Thunk.from(env, expressions)
         }
       // definition
