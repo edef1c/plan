@@ -6,7 +6,8 @@
 
 [0-9]+("."[0-9]+)?\b  return 'LITERAL'
 \"(?:[^"\\]*|\\["\\bfnrt\/]|\\u[0-9a-f]{4})*\" return 'LITERAL'
-[^\s()"]+             return 'IDENTIFIER'
+[^\s()"'][^\s()"]*    return 'IDENTIFIER'
+"'"                   return "'"
 "("                   return '('
 "."                   return 'CONS'
 ")"                   return ')'
@@ -29,6 +30,8 @@ program
 e
     : list
         {$$ = $1}
+    | "'" e
+        {$$ = yy.Cons.of(yy.Identifier.of('quote'), $2)}
     | LITERAL
         {$$ = JSON.parse(yytext)}
     | IDENTIFIER
