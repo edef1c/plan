@@ -50,7 +50,9 @@ function operate(fn, args) { /* jshint validthis:true */
 
 exports.zip = zip
 function zip(parameter, argument, replace) { /* jshint validthis:true */
-  if (is.Identifier(parameter))
+  if (is.Nil(parameter) && is.Nil(argument))
+    return
+  else if (is.Identifier(parameter))
     (replace
       ? this.replace
       : this.set)(parameter.name, argument)
