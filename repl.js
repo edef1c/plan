@@ -1,10 +1,12 @@
 'use strict';
 var readline = require('readline')
+  , plan = require('./')
+  , init = require('./repl-env')
 exports.start =
 function start(stdin, stdout) {
   var face = readline.createInterface(stdin || process.stdin, stdout || process.stdout)
-    , plan = require('./')
     , env = plan()
+  init(env)
 
   loop()
   function loop() {
