@@ -93,6 +93,9 @@ function newEnv() {
       , 'eval': function(expression, $env) {
           return Foreign.unwrap(this.eval($env)).eval(expression)
         }
+      , 'operate': lambda(function($env, operative, operands) {
+          return operate.call(Foreign.unwrap(env), operative, operands)
+        })
       , 'create-env': lambda(function($env) {
           return Foreign.wrap(createEnv(Foreign.unwrap($env)))
         })
