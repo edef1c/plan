@@ -149,11 +149,11 @@ function newEnv() {
           zip.call(this, ident, this.eval(value), true)
         }
       // conditionals
-      , 'if': function(expression, ifTrue, ifFalse) {
-          return this.eval(this.eval(expression)
+      , 'bool': wrap(function(expression, ifTrue, ifFalse) {
+          return expression
             ? ifTrue
-            : ifFalse)
-        }
+            : ifFalse
+        })
       , 'cond': function() {
           var clauses = [].slice.call(arguments)
             , len = clauses.length
