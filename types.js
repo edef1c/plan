@@ -29,11 +29,9 @@ Cons.toArray = function(cons) {
   if (cons && typeof cons.length == 'number')
     return [].slice.call(cons)
   var ret = []
-  while (cons !== null) {
-    if (!(cons instanceof Cons))
-      throw new TypeError("can't make an array from that")
-    ret.push(cons.car)
-    cons = cons.cdr
+  while (!is.Nil(cons)) {
+    ret.push(car(cons))
+    cons = cdr(cons)
   }
   return ret
 }
