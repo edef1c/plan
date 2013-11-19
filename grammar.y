@@ -6,10 +6,10 @@
 
 [0-9]+("."[0-9]+)?\b  return 'LITERAL'
 \"(?:[^"\\]*|\\["\\bfnrt\/]|\\u[0-9a-f]{4})*\" return 'LITERAL'
-[^\s()"'][^\s()"]*    return 'IDENTIFIER'
+[^\s()"'.][^\s()".]*  return 'IDENTIFIER'
 "'"                   return "'"
 "("                   return '('
-"."                   return 'CONS'
+"."                   return '.'
 ")"                   return ')'
 \s+                   /* skip whitespace */
 <<EOF>>               return 'EOF'
@@ -40,6 +40,8 @@ e
 es
     :
         {$$ = null}
+    | '.' e
+        {$$ = $2}
     | e es
         {$$ = yy.Cons.of($1, $2)}
     ;
@@ -47,6 +49,4 @@ es
 list
     : '(' es ')'
         {$$ = $2}
-    | '(' es CONS e ')'
-        {$$ = yy.Cons.of($2, $4)}
     ;
