@@ -7,13 +7,14 @@ var ProtoDict = require('protodict')
   , Cons = types.Cons
   , car = Cons.car
   , cdr = Cons.cdr
+  , nil = Cons.nil
   , PFunction = types.Function
   , Foreign = types.Foreign
   , fs = require('fs')
   , init = require('./parser').parse(fs.readFileSync(require.resolve('./env.plan')).toString())
 
 function inspect(val) {
-  return _inspect(val, { depth: null })
+  return _inspect(val, { depth: nil })
 }
 
 function createEnv(parent) {
@@ -56,11 +57,11 @@ function zip(parameter, argument, replace) { /* jshint validthis:true */
   else if (is.List(parameter) && is.List(argument)) {
     while (is.List(parameter) && !is.Nil(parameter)) {
       zip.call(this, car(parameter), is.Nil(argument)
-        ? null
+        ? nil
         : car(argument))
       parameter = cdr(parameter)
       argument = is.Nil(argument)
-        ? null
+        ? nil
         : cdr(argument)
     }
     if (!is.Nil(parameter))
@@ -94,7 +95,7 @@ function newEnv() {
         }
       , 'lambda': function hostLambda(parameters) {
           var expressions = [].slice.call(arguments, 1)
-          return displayName(++i, wrap(vau.call(this, parameters, null, expressions)))
+          return displayName(++i, wrap(vau.call(this, parameters, nil, expressions)))
         }
       // environment
       , 'eval': wrap(function($env, expression) {
@@ -156,7 +157,7 @@ function newEnv() {
     this.expression = expression
     this.post = typeof post == 'function'
       ? post
-      : null
+      : nil
   }
 
   Thunk.of = function(env, expression, post) {
@@ -165,7 +166,7 @@ function newEnv() {
 
   Thunk.from = function(env, expressions, post) {
     expressions = is.Nil(expressions)
-      ? null
+      ? nil
       : is.Nil(cdr(expressions))
         ? car(expressions)
         : Cons.of(begin, Cons.from(expressions))

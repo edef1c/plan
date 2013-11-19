@@ -6,6 +6,8 @@ function Cons(car, cdr) {
   this.cdr = cdr
 }
 
+Cons.nil = null
+
 Cons.of = function(car, cdr) {
   return new Cons(car, cdr)
 }
