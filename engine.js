@@ -1,7 +1,7 @@
 'use strict';
 var ProtoDict = require('protodict')
   , Dict = require('dict')
-  , inspect = require('util').inspect
+  , _inspect = require('util').inspect
   , is = require('./is')
   , types = require('./types')
   , Cons = types.Cons
@@ -11,6 +11,10 @@ var ProtoDict = require('protodict')
   , Foreign = types.Foreign
   , fs = require('fs')
   , init = require('./parser').parse(fs.readFileSync(require.resolve('./env.plan')).toString())
+
+function inspect(val) {
+  return _inspect(val, { depth: null })
+}
 
 function createEnv(parent) {
   var env = new ProtoDict(parent)
@@ -79,9 +83,9 @@ function newEnv() {
 
   var env = new Dict(
       // list processing
-      { 'car': wrap(car)
-      , 'cdr': wrap(cdr)
-      , 'null?': wrap(is.Nil)
+      { 'car': car
+      , 'cdr': cdr
+      , 'null?': is.Nil
       // funcy shit
       , 'vau': function hostVau(parameters, envBinding) {
           var expressions = [].slice.call(arguments, 2)
@@ -98,48 +102,10 @@ function newEnv() {
       , 'operate': wrap(function($env, operative, operands) {
           return operate.call(Foreign.unwrap(env), operative, operands)
         })
-      , 'create-env': wrap(function($env) {
-          return Foreign.wrap(createEnv(Foreign.unwrap($env)))
-        })
-      , 'set-env!': function($env, binding, value) {
-          zip.call(Foreign.unwrap(this.eval($env)), binding, this.eval(value))
-        }
       // error reporting
       , 'error': wrap(function(error) {
           throw new Error(error)
         })
-      // lexical binding
-      , 'let': function(bindings) {
-          var env = createEnv(this)
-            , expressions = [].slice.call(arguments, 1)
-          Cons.forEach.call(this, bindings, function(binding) {
-            var ident = car(binding)
-              , value = createEnv(this).eval(car(cdr(binding)))
-            zip.call(env, ident, value)
-          })
-          return Thunk.from(env, expressions)
-        }
-      , 'let*': function(bindings) {
-          var env = this
-            , expressions = [].slice.call(arguments, 1)
-          Cons.forEach.call(this, bindings, function(binding) {
-            env = createEnv(env)
-            var ident = car(binding)
-              , value = this.eval(car(cdr(binding)))
-            zip.call(env, ident, value)
-          })
-          return Thunk.from(env, expressions)
-        }
-      , 'letrec': function(bindings) {
-          var env = createEnv(this)
-            , expressions = [].slice.call(arguments, 1)
-          Cons.forEach.call(this, bindings, function(binding) {
-            var ident = car(binding)
-              , value = this.eval(car(cdr(binding)))
-            zip.call(env, ident, value)
-          })
-          return Thunk.from(env, expressions)
-        }
       // definition
       , 'define': function define(ident, value) {
           zip.call(this, ident, this.eval(value))
@@ -154,18 +120,8 @@ function newEnv() {
             ? ifTrue
             : ifFalse
         })
-      , 'cond': function() {
-          var clauses = [].slice.call(arguments)
-            , len = clauses.length
-          for (var i = 0; i < len; i++) {
-            var clause = clauses[i]
-              , condition = clause[0]
-              , expression = clause[1]
-            if (this.eval(condition))
-              return this.eval(expression)
-          }
-        }
-      , 'else': true
+      , '#t': true
+      , '#f': false
       // sequencing
       , 'begin': begin
       // basic arithmetic functions
@@ -223,7 +179,7 @@ function newEnv() {
     return ret
   }
 
-  function _eval(expression) { /*jshint validthis:true*/
+  var _eval = function _eval(expression) { /*jshint validthis:true*/
     if (typeof expression == 'number'
      || typeof expression == 'string'
      || is.Function(expression)
@@ -240,6 +196,24 @@ function newEnv() {
     else
       throw new TypeError('unknown expression type: ' + inspect(expression))
   }
+
+  if (process.env.DEBUG) {
+    _eval = (function(_eval) {
+      return function(expression) {
+        var ret
+        try {
+          ret = _eval.call(this, expression)
+        }
+        catch (e) {
+          console.error(inspect(expression) + ' -> \u1f4a3')
+          throw e
+        }
+        console.log(inspect(expression) + ' -> ' + inspect(ret))
+        return ret
+      }
+    })(_eval)
+  }
+
 
   env.set('env', Foreign.of(env))
   operate.call(env, env.eval, init)
