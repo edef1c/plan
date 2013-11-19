@@ -43,6 +43,8 @@ function operate(fn, args) { /* jshint validthis:true */
   args = Cons.toArray(args)
   if (is.PFunction(fn))
     return fn.fn.call(this, args)
+  if (typeof fn != 'function')
+    throw new TypeError('not a function')
   return fn.apply(this, args)
 }
 
