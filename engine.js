@@ -92,9 +92,9 @@ function newEnv() {
           return displayName(++i, wrap(vau.call(this, parameters, null, expressions)))
         }
       // environment
-      , 'eval': function(expression, $env) {
-          return Foreign.unwrap(this.eval($env)).eval(expression)
-        }
+      , 'eval': wrap(function(expression, $env) {
+          return Foreign.unwrap($env).eval(expression)
+        })
       , 'operate': wrap(function($env, operative, operands) {
           return operate.call(Foreign.unwrap(env), operative, operands)
         })
