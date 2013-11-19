@@ -88,6 +88,13 @@ Cons.map = function(l, f) {
   return cons
 }
 
+Cons.forEach = function(l, f) {
+  while (!is.Nil(l)) {
+    f.call(this, car(l))
+    l = cdr(l)
+  }
+}
+
 exports.Identifier = Identifier
 function Identifier(name) {
   this.name = name
