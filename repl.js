@@ -27,7 +27,7 @@ function start(stdin, stdout) {
         console.log(plan.operate.call(env, env.eval, code))
       }
       catch (e) {
-        console.error(e)
+        console.error(e.stack)
       }
       loop()
     }
