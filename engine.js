@@ -104,6 +104,10 @@ function newEnv() {
       , 'set-env!': function($env, binding, value) {
           zip.call(Foreign.unwrap(this.eval($env)), binding, this.eval(value))
         }
+      // error reporting
+      , 'error': lambda(function(error) {
+          throw new Error(error)
+        })
       // lexical binding
       , 'let': function(bindings) {
           var env = createEnv(this)
