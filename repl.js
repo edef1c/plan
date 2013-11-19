@@ -23,7 +23,12 @@ function start(stdin, stdout) {
         return face.once('line', onLine)
       }
       face.pause()
-      console.log(plan.operate.call(env, env.eval, code))
+      try {
+        console.log(plan.operate.call(env, env.eval, code))
+      }
+      catch (e) {
+        console.error(e)
+      }
       loop()
     }
   }
