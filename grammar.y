@@ -35,9 +35,9 @@ e
     ;
 es
     :
-        {$$ = []}
+        {$$ = null}
     | e es
-        {$$ = [$1].concat($2)}
+        {$$ = yy.Cons.of($1, $2)}
     ;
 
 list

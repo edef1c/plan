@@ -34,7 +34,9 @@ function lambda(fn) {
   })
 }
 
+exports.apply = apply
 function apply(fn, args) { /* jshint validthis:true */
+  args = Cons.toArray(args)
   if (is.PFunction(fn))
     return fn.fn.call(this, args)
   return fn.apply(this, args)
@@ -199,10 +201,13 @@ function newEnv() {
   }
 
   Thunk.from = function(env, expressions, post) {
-    return new Thunk(env, expressions.length > 1
-      ? [begin].concat([].slice.call(expressions))
-      : expressions[0]
-      , post)
+    expressions = is.Nil(expressions)
+      ? null
+      : is.Nil(cdr(expressions))
+        ? car(expressions)
+        : Cons.of(begin, Cons.from(expressions))
+
+    return new Thunk(env, expressions, post)
   }
 
   Thunk.prototype.resolve = function() {
