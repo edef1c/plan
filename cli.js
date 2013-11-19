@@ -10,6 +10,6 @@ var file = process.argv[2]
 
 env.set('log', plan.lambda(console.log.bind(console)))
 
-var result = plan.apply.call(env, env.eval, code)
+var result = plan.operate.call(env, env.eval, code)
 
 console.log(result)

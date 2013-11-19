@@ -5,7 +5,7 @@ var engine = require('./engine')
 module.exports = exports = createEnv
 exports.createEnv = createEnv
 exports.lambda = engine.lambda
-exports.apply = engine.apply
+exports.operate = engine.operate
 
 function createEnv() {
   return engine()

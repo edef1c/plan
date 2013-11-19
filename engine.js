@@ -30,12 +30,12 @@ function displayName(name, fn) {
 
 function lambda(fn) {
   return displayName('lambda_' + (fn.displayName || fn.name || i++), function() {
-    return apply.call(this, fn, [].map.call(arguments, function(item) { return this.eval(item) }, this))
+    return operate.call(this, fn, [].map.call(arguments, function(item) { return this.eval(item) }, this))
   })
 }
 
-exports.apply = apply
-function apply(fn, args) { /* jshint validthis:true */
+exports.operate = operate
+function operate(fn, args) { /* jshint validthis:true */
   args = Cons.toArray(args)
   if (is.PFunction(fn))
     return fn.fn.call(this, args)
@@ -90,6 +90,9 @@ function newEnv() {
           return displayName(++i, lambda(vau.call(this, parameters, null, expressions)))
         }
       // environment
+      , 'eval': function(expression, $env) {
+          return Foreign.unwrap(this.eval($env)).eval(expression)
+        }
       , 'create-env': lambda(function($env) {
           return Foreign.wrap(createEnv(Foreign.unwrap($env)))
         })
@@ -230,13 +233,13 @@ function newEnv() {
       else
         throw new ReferenceError(expression.name + ' is not defined')
     else if (is.List(expression) && (expression = Cons.toArray(expression)))
-      return apply.call(this, this.eval(expression[0]), expression.slice(1))
+      return operate.call(this, this.eval(expression[0]), expression.slice(1))
     else
       throw new TypeError('unknown expression type: ' + inspect(expression))
   }
 
   env.set('env', Foreign.of(env))
-  apply.call(env, env.eval, init)
+  operate.call(env, env.eval, init)
 
   return env
 }
