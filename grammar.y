@@ -31,7 +31,7 @@ e
     : list
         {$$ = $1}
     | "'" e
-        {$$ = yy.Cons.of(yy.Identifier.of('quote'), $2)}
+        {$$ = yy.Cons.from([yy.Identifier.of('quote'), $2])}
     | LITERAL
         {$$ = JSON.parse(yytext)}
     | IDENTIFIER
