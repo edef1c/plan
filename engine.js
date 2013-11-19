@@ -49,7 +49,7 @@ function zip(parameter, argument, replace) { /* jshint validthis:true */
       ? this.replace
       : this.set)(parameter.name, argument)
   else if (is.List(parameter) && is.List(argument)) {
-    while (!is.Nil(parameter)) {
+    while (is.List(parameter) && !is.Nil(parameter)) {
       zip.call(this, car(parameter), is.Nil(argument)
         ? null
         : car(argument))
@@ -58,6 +58,8 @@ function zip(parameter, argument, replace) { /* jshint validthis:true */
         ? null
         : cdr(argument)
     }
+    if (!is.Nil(parameter))
+      zip.call(this, parameter, argument, replace)
   }
   else
     throw new TypeError('invalid pattern: ' + inspect(parameter) + ' :: ' + inspect(argument))
