@@ -79,9 +79,9 @@ function newEnv() {
 
   var env = new Dict(
       // list processing
-      { 'car': car
-      , 'cdr': cdr
-      , 'null?': is.Nil
+      { 'car': wrap(car)
+      , 'cdr': wrap(cdr)
+      , 'null?': wrap(is.Nil)
       // funcy shit
       , 'vau': function hostVau(parameters, envBinding) {
           var expressions = [].slice.call(arguments, 2)
