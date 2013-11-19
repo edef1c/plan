@@ -8,6 +8,7 @@
 \"(?:[^"\\]*|\\["\\bfnrt\/]|\\u[0-9a-f]{4})*\" return 'LITERAL'
 [^\s()"]+             return 'IDENTIFIER'
 "("                   return '('
+"."                   return 'CONS'
 ")"                   return ')'
 \s+                   /* skip whitespace */
 <<EOF>>               return 'EOF'
@@ -43,4 +44,6 @@ es
 list
     : '(' es ')'
         {$$ = $2}
+    | '(' es CONS e ')'
+        {$$ = yy.Cons.of($2, $4)}
     ;
