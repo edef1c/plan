@@ -40,12 +40,11 @@ function wrap(fn) {
 
 exports.operate = operate
 function operate(fn, args) { /* jshint validthis:true */
-  args = Cons.toArray(args)
   if (is.PFunction(fn))
-    return fn.fn.call(this, args)
+    return fn.fn.call(this, Cons.from(args))
   if (typeof fn != 'function')
     throw new TypeError('not a function')
-  return fn.apply(this, args)
+  return fn.apply(this, Cons.toArray(args))
 }
 
 exports.zip = zip
