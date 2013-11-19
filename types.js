@@ -38,7 +38,8 @@ Cons.toArray = function(cons) {
   return ret
 }
 
-Cons.car = function(val) {
+Cons.car = car
+function car(val) {
   if (val === null)
     throw new TypeError('attempt to get car out of nil')
   if (val instanceof Cons)
@@ -53,7 +54,8 @@ Cons.car = function(val) {
     throw new TypeError('attempt to get car on non-cons')
 }
 
-Cons.cdr = function(val) {
+Cons.cdr = cdr
+function cdr(val) {
   if (val === null)
     throw new TypeError('attempt to get cdr out of nil')
   if (val instanceof Cons)
@@ -68,6 +70,22 @@ Cons.cdr = function(val) {
   }
   else
     throw new TypeError('attempt to get cdr on non-cons')
+}
+
+Cons.map = function(l, f) {
+  if (is.Nil(l))
+    return null
+  var cons = new Cons()
+    , prev = null
+    , cur = cons
+  while (!is.Nil(l)) {
+    cur.car = f.call(this, car(l))
+    l = cdr(l)
+    prev = cur
+    cur = cur.cdr = new Cons()
+  }
+  prev.cdr = null
+  return cons
 }
 
 exports.Identifier = Identifier
@@ -101,3 +119,5 @@ Foreign.unwrap = function(obj) {
 
 for (var typeName in exports) if ({}.hasOwnProperty.call(exports, typeName))
   exports[typeName].prototype.type = typeName
+
+var is = require('./is')
