@@ -11,7 +11,8 @@ function start(stdin, stdout) {
   loop()
   function loop() {
     var text = ''
-    face.prompt('> ')
+    face.setPrompt('> ')
+    face.prompt()
     face.once('line', onLine)
     function onLine(line) {
       var code
@@ -19,9 +20,11 @@ function start(stdin, stdout) {
         code = plan.parse(text += line)
       }
       catch (e) {
-        face.prompt('… ')
+        face.setPrompt('.. ')
+        face.prompt()
         return face.once('line', onLine)
       }
+
       face.pause()
       try {
         console.log(plan.operate.call(env, env.eval, code))
@@ -29,6 +32,13 @@ function start(stdin, stdout) {
       catch (e) {
         console.error(e.stack)
       }
+      face.removeListener('SIGINT', interrupt)
+      loop()
+    }
+
+    face.once('SIGINT', interrupt)
+    function interrupt() {
+      face.removeListener('line', onLine)
       loop()
     }
   }
