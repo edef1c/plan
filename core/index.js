@@ -5,7 +5,7 @@ var types = require('./types')
   , car = Pair.car
   , cdr = Pair.cdr
   , List = types.List
-  , Dict = types.Dict
+  , Env = types.Env
   , fcomp = require('fcomp')
   , Thunk = require('./thunk')
   , curriedFunctionToApplicative = fcomp(uncurry, functionToApplicative)
@@ -90,11 +90,11 @@ function set(env, symbol, value) {
   env.set(symbol, value)
 }
 
-introduce('dict-get'    , curriedFunctionToApplicative(Dict.prototype.get))
-introduce('dict-define!', curriedFunctionToApplicative(Dict.prototype.set))
-introduce('dict-parent' , curriedFunctionToApplicative(function() { return this.__proto__ }))
-introduce('dict-has'    , curriedFunctionToApplicative(Dict.prototype.has))
-introduce('dict-has-own', curriedFunctionToApplicative(Dict.prototype.hasOwn))
+introduce('env-get'    , curriedFunctionToApplicative(Env.prototype.get))
+introduce('env-define!', curriedFunctionToApplicative(Env.prototype.set))
+introduce('env-parent' , curriedFunctionToApplicative(function() { return this.__proto__ }))
+introduce('env-has'    , curriedFunctionToApplicative(Env.prototype.has))
+introduce('env-has-own', curriedFunctionToApplicative(Env.prototype.hasOwn))
 
 
 introduce('+', functionToApplicative(function(a, b) { return a + b }))

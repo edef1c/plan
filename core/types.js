@@ -109,25 +109,25 @@ List.toArray = function(list) {
   return arr
 }
 
-is.Dict = function(object) { return object instanceof Dict }
-exports.Dict = Dict
+is.Env = function(object) { return object instanceof Env }
+exports.Env = Env
 
-function Dict() {}
-Dict.prototype = Object.create(null)
+function Env() {}
+Env.prototype = Object.create(null)
 
-Dict.prototype.has = function(symbol) {
+Env.prototype.has = function(symbol) {
   if (!is.Symbol(symbol))
     throw new TypeError("can't use non-symbol as identifier")
   return ('~' + symbol.identifier) in this
 }
 
-Dict.prototype.hasOwn = function(symbol) {
+Env.prototype.hasOwn = function(symbol) {
   if (!is.Symbol(symbol))
     throw new TypeError("can't use non-symbol as identifier")
   return {}.hasOwnProperty.call(this, '~' + symbol.identifier)
 }
 
-Dict.prototype.get = function(symbol) {
+Env.prototype.get = function(symbol) {
   if (!is.Symbol(symbol))
     throw new TypeError("can't use non-symbol as identifier")
   if (symbol.identifier === '@')
@@ -138,7 +138,7 @@ Dict.prototype.get = function(symbol) {
   return value
 }
 
-Dict.prototype.set = function(symbol, value) {
+Env.prototype.set = function(symbol, value) {
   if (!is.Symbol(symbol))
     throw new TypeError("can't use non-symbol as identifier")
   if (symbol.identifier === '@')
@@ -146,7 +146,7 @@ Dict.prototype.set = function(symbol, value) {
   this['~' + symbol.identifier] = value
 }
 
-Dict.prototype.inspect = function(depth) {
+Env.prototype.inspect = function(depth) {
   var output = '#{'
     , first = true
   for (var key in this) if (key[0] === '~' && {}.hasOwnProperty.call(this, key)) {
@@ -156,7 +156,7 @@ Dict.prototype.inspect = function(depth) {
       output += ',\n  '
     output += key.slice(1) + ' → ' + inspect(this[key])
   }
-  if (this.__proto__ !== Dict.prototype) {
+  if (this.__proto__ !== Env.prototype) {
     if (first)
       first = false
     else

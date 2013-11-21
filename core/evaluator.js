@@ -6,11 +6,11 @@ var types = require('./types')
   , List = types.List
   , car = List.car
   , cdr = List.cdr
-  , Dict = types.Dict
+  , Env = types.Env
   , Thunk = require('./thunk')
 
 function Plan() {}
-Plan.prototype = new Dict()
+Plan.prototype = new Env()
 
 Plan.prototype.eval = function mEval(exp) {
   var ret = new Thunk(this, exp)
