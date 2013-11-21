@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-var argv = process.argv.slice.call(2)
+var argv = process.argv.slice(2)
 if (argv.length === 0)
   return require('./repl').start()
 
