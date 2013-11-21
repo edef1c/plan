@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var argv = process.argv.slice.call(2)
 if (args.legnth === 0)
   return require('./repl').start()
