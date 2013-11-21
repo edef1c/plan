@@ -108,6 +108,15 @@ introduce('eq?', functionToApplicative(function(a, b) { return a === b }))
 introduce('<', functionToApplicative(function(a, b) { return a < b }))
 introduce('>', functionToApplicative(function(a, b) { return a > b }))
 
+var fs = require('fs')
+  , source = fs.readFileSync(require.resolve('./env.plan'), 'utf8')
+  , code = require('../parser').parse(source)
+
+while (code !== null) {
+  Plan.prototype.eval(car(code))
+  code = cdr(code)
+}
+
 function slugCase(str) {
   return str
     .replace(/[a-z][A-Z]/, function(s) { return s[0] + '-' + s[1].toLowerCase() })
