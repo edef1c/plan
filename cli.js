@@ -14,12 +14,7 @@ var fs = require('fs')
   , program = Platform.parse(source)
   , env = new Platform()
 
-try {
-  while (program !== null) {
-    env.eval(car(program))
-    program = cdr(program)
-  }
-}
-catch (e) {
-  console.error(e.stack)
+while (program !== null) {
+  env.eval(car(program))
+  program = cdr(program)
 }
