@@ -109,7 +109,7 @@ introduce('<', functionToApplicative(function(a, b) { return a < b }))
 introduce('>', functionToApplicative(function(a, b) { return a > b }))
 
 var fs = require('fs')
-  , source = fs.readFileSync(require.resolve('./env.plan'), 'utf8')
+  , source = fs.readFileSync(__dirname + '/env.plan', 'utf8')
   , code = require('../parser').parse(source)
 
 while (code !== null) {
@@ -122,4 +122,3 @@ function slugCase(str) {
     .replace(/[a-z][A-Z]/, function(s) { return s[0] + '-' + s[1].toLowerCase() })
     .toLowerCase()
 }
-
