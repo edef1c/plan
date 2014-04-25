@@ -1,36 +1,39 @@
 'use strict';
 module.exports = Plan
 
-var types = require('./types')
-  , is = types.is
-  , List = types.List
-  , car = List.car
-  , cdr = List.cdr
-  , Env = types.Env
-  , Thunk = require('./thunk')
+var _ = require('./types')
 
 function Plan() {}
-Plan.prototype = new Env()
+Plan.prototype = _.env()
 
-Plan.prototype.eval = function mEval(exp) {
-  var ret = new Thunk(this, exp)
-  while (ret instanceof Thunk)
-    ret = mEval_.call(ret.env, ret.expression)
-  return ret
+function debug() {
+  if (process.env.DEBUG)
+    console.log.apply(console, arguments)
 }
 
-function mEval_(exp) { var env = this /* jshint validthis:true */
-  if (is.Symbol(exp))
+Plan.prototype.eval =
+function mEval(exp) { var env = this /* jshint validthis:true */
+  if (_.is_symbol(exp)) {
+    debug('resolving symbol', exp)
     return env.get(exp)
-  else if (is.Pair(exp))
-    return env.operate(env.eval(car(exp)), cdr(exp))
-  else
+  }
+  else if (_.is_list(exp)) {
+    debug('evaluating fn', _.first(exp), 'with args', _.rest(exp))
+    return env.operate(env.eval(_.first(exp)), _.rest(exp))
+  }
+  else if (_.is_vector(exp)) {
+    debug('evaluating vector', exp)
+    return _.map(function(exp) { return env.eval(exp) }, exp)
+  }
+  else {
+    debug('passing through literal', exp)
     return exp
+  }
 }
 
 Plan.prototype.operate =
 function mOperate(operative, operands) { var env = this
   if (typeof operative !== 'function')
-    throw new TypeError('not a function')
-  return operative.call(env, operands)
+    throw new TypeError('not a function: ' + {}.toString.call(operative))
+  return _.apply(operative.bind(env), operands)
 }

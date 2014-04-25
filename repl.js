@@ -2,10 +2,7 @@
 var readline = require('readline')
   , inspect = require('util').inspect
   , Plan = require('./platform')
-  , types = Plan.types
-  , List = types.List
-  , car = List.car
-  , cdr = List.cdr
+  , _ = require('mori')
 
 exports.start =
 function start(stdin, stdout) {
@@ -33,8 +30,8 @@ function start(stdin, stdout) {
       var ret
       try {
         while (code !== null) {
-          ret = env.eval(car(code))
-          code = cdr(code)
+          ret = env.eval(_.first(code))
+          code = _.rest(code)
         }
       }
       catch (e) {

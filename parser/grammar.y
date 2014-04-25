@@ -6,10 +6,12 @@
 
 [0-9]+("."[0-9]+)?\b  return 'LITERAL'
 \"(?:[^"\\]*|\\["\\bfnrt\/]|\\u[0-9a-f]{4})*\" return 'LITERAL'
-[^\s()"'.][^\s()".]*  return 'IDENTIFIER'
+[^\s()\[\]"'.][^\s()\[\]".]*  return 'IDENTIFIER'
 "'"                   return "'"
 "("                   return '('
+"["                   return '['
 "."                   return '.'
+"]"                   return ']'
 ")"                   return ')'
 \s+                   /* skip whitespace */
 <<EOF>>               return 'EOF'
@@ -30,12 +32,14 @@ program
 e
     : list
         {$$ = $1}
+    | vector
+        {$$ = $1}
     | "'" e
-        {$$ = yy.List.of(function() { return $2 })}
+        {$$ = $2}
     | LITERAL
         {$$ = JSON.parse(yytext)}
     | IDENTIFIER
-        {$$ = yy.Symbol.of(yytext)}
+        {$$ = yy.symbol(yytext)}
     ;
 es
     :
@@ -43,10 +47,15 @@ es
     | '.' e
         {$$ = $2}
     | e es
-        {$$ = yy.Pair.of($1, $2)}
+        {$$ = yy.cons($1, $2)}
     ;
 
 list
     : '(' es ')'
         {$$ = $2}
+    ;
+
+vector
+    : '[' es ']'
+        {$$ = yy.apply(yy.vector, $2)}
     ;

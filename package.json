@@ -5,7 +5,7 @@
   "main": "index.js",
   "bin": "cli.js",
   "dependencies": {
-    "fcomp": "~1.1.0"
+    "mori-plan": "^0.2.7-SNAPSHOT"
   },
   "devDependencies": {
     "jison": "~0.4.13"

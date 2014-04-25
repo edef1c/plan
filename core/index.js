@@ -1,25 +1,9 @@
 'use strict';
-var types = require('./types')
-  , is = types.is
-  , Pair = types.Pair
-  , car = Pair.car
-  , cdr = Pair.cdr
-  , List = types.List
-  , Env = types.Env
-  , fcomp = require('fcomp')
-  , Thunk = require('./thunk')
-  , curriedFunctionToApplicative = fcomp(uncurry, functionToApplicative)
-  , curriedFunctionToOperative = fcomp(uncurry, functionToOperative)
+var _ = require('./types')
 
-function functionToApplicative(fn) {
-  return function(args) { var env = this
-    return fn.apply(env, List.toArray(args).map(env.eval, env))
-  }
-}
-
-function functionToOperative(fn) {
-  return function(args) { var env = this
-    return fn.apply(env, List.toArray(args))
+function lambda(fn) {
+  return function() { var env = this
+    return _.apply(fn.bind(env), _.map(env.eval.bind(env), _.vector.apply(_, arguments)))
   }
 }
 
@@ -31,30 +15,32 @@ function uncurry(fn) {
 }
 
 var Plan = module.exports = require('./evaluator')
-  , types = require('./types')
-  , Symbol = types.Symbol
-
-Plan.ffi = functionToApplicative
 
 function introduce(identifier, value) {
-  Plan.prototype.set(Symbol.of(identifier), value)
+  Plan.prototype.set(_.symbol(identifier), value)
 }
-
-for (var type in is)
-  introduce(slugCase(type) + '?', functionToApplicative(is[type]))
 
 introduce('#f', false)
 introduce('#t', true)
 
-introduce('car'    , functionToApplicative(car))
-introduce('cdr'    , functionToApplicative(cdr))
-introduce('cons'   , functionToApplicative(Pair.of))
+// bring mori stuff in here
+Object.keys(_)
+  .filter(function(key) { return key.match(/^is_/) })
+  .forEach(function(key) {
+    introduce(key.replace(/^is_/, '').replace(/_/g, '-') + '?', lambda(_[key]))
+  })
 
-introduce('eval'   , curriedFunctionToApplicative(Plan.prototype.eval))
-introduce('operate', curriedFunctionToApplicative(Plan.prototype.operate))
+;['first', 'nth', 'rest', 'list', 'vector', 'hash_map', 'sorted_set', 'range', 'cons']
+  .forEach(function(key) {
+    introduce(key.replace(/_/g, '-'), lambda(_[key]))
+  })
 
-introduce('bool'   , functionToApplicative(bool))
-introduce('vau'    , functionToOperative(mVau))
+introduce('eval'   , lambda(uncurry(Plan.prototype.eval)))
+introduce('operate', lambda(uncurry(Plan.prototype.operate)))
+
+introduce('bool', lambda(bool))
+introduce('vau', mVau)
+introduce('def', mDefine)
 
 function bool(cond, ifTrue, ifFalse) { var env = this /* jshint validthis:true */
   return cond !== false
@@ -67,54 +53,32 @@ function mDefine(symbol, $value) { var env = this /* jshint validthis:true */
 }
 
 function mVau(parameters, envParamater, body) { var definitionEnv = this /* jshint validthis:true */
-  return function(args) { var callingEnv = this
+  return function() { var callingEnv = this
     var env = Object.create(definitionEnv)
-    set(env, parameters, args)
+    env.set(parameters, _.vector.apply(_, arguments))
     env.set(envParamater, callingEnv)
-    return new Thunk(env, body)
+    return env.eval(body)
   }
 }
 
-function set(env, symbol, value) {
-  if (symbol === null)
-    return
-  if (is.Pair(symbol)) {
-    set(env, car(symbol), value === null
-      ? null
-      : car(value))
-    set(env, cdr(symbol), value === null
-      ? null
-      : cdr(value))
-    return
-  }
-  env.set(symbol, value)
-}
+introduce('+', lambda(function(a, b) { return a + b }))
+introduce('-', lambda(function(a, b) { return a - b }))
+introduce('*', lambda(function(a, b) { return a * b }))
+introduce('/', lambda(function(a, b) { return a / b }))
+introduce('%', lambda(function(a, b) { return a % b }))
 
-introduce('env-get'    , curriedFunctionToApplicative(Env.prototype.get))
-introduce('env-define!', curriedFunctionToApplicative(Env.prototype.set))
-introduce('env-parent' , curriedFunctionToApplicative(function() { return this.__proto__ }))
-introduce('env-has'    , curriedFunctionToApplicative(Env.prototype.has))
-introduce('env-has-own', curriedFunctionToApplicative(Env.prototype.hasOwn))
+introduce('=', lambda(_.equals))
 
-
-introduce('+', functionToApplicative(function(a, b) { return a + b }))
-introduce('-', functionToApplicative(function(a, b) { return a - b }))
-introduce('*', functionToApplicative(function(a, b) { return a * b }))
-introduce('/', functionToApplicative(function(a, b) { return a / b }))
-introduce('%', functionToApplicative(function(a, b) { return a % b }))
-
-introduce('eq?', functionToApplicative(function(a, b) { return a === b }))
-
-introduce('<', functionToApplicative(function(a, b) { return a < b }))
-introduce('>', functionToApplicative(function(a, b) { return a > b }))
+introduce('<', lambda(function(a, b) { return a < b }))
+introduce('>', lambda(function(a, b) { return a > b }))
 
 var fs = require('fs')
   , source = fs.readFileSync(__dirname + '/env.plan', 'utf8')
   , code = require('../parser').parse(source)
 
-while (code !== null) {
-  Plan.prototype.eval(car(code))
-  code = cdr(code)
+while (!_.is_empty(code)) {
+  Plan.prototype.eval(_.first(code))
+  code = _.rest(code)
 }
 
 function slugCase(str) {
