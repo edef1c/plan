@@ -18,8 +18,14 @@ function mEval(exp) { var env = this /* jshint validthis:true */
     return env.get(exp)
   }
   else if (_.is_list(exp)) {
-    debug('evaluating fn', _.first(exp), 'with args', _.rest(exp))
-    return env.operate(env.eval(_.first(exp)), _.rest(exp))
+    if (_.is_empty(exp)) {
+      debug('passing through empty list')
+      return exp
+    }
+    else {
+      debug('evaluating fn', _.first(exp), 'with args', _.rest(exp))
+      return env.operate(env.eval(_.first(exp)), _.rest(exp))
+    }
   }
   else if (_.is_vector(exp)) {
     debug('evaluating vector', exp)
