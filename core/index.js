@@ -31,13 +31,19 @@ introduce('#f', false)
 introduce('#t', true)
 
 // bring mori stuff in here
-Object.keys(_)
+function keys(obj) {
+  var arr = []
+  for (var key in obj) arr.push(key)
+  return arr
+}
+
+keys(_)
   .filter(function(key) { return key.match(/^is_/) })
   .forEach(function(key) {
     introduce(key.replace(/^is_/, '').replace(/_/g, '-') + '?', lambda(_[key]))
   })
 
-;['first', 'nth', 'rest', 'list', 'vector', 'hash_map', 'sorted_set', 'range', 'cons']
+;['first', 'nth', 'rest', 'last', 'list', 'vector', 'hash_map', 'sorted_set', 'range', 'cons']
   .forEach(function(key) {
     introduce(key.replace(/_/g, '-'), lambda(_[key]))
   })
@@ -48,6 +54,7 @@ introduce('operate', lambda(uncurry(Plan.prototype.operate)))
 introduce('bool', lambda(bool))
 introduce('$vau', mVau)
 introduce('def', mDefine)
+introduce('create', lambda(Object.create))
 
 function bool(cond, ifTrue, ifFalse) { var env = this /* jshint validthis:true */
   return cond !== false

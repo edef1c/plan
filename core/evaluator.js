@@ -6,16 +6,25 @@ var _ = require('./types')
 function Plan() {}
 Plan.prototype = _.env()
 
+var indent = 0
 function debug() {
   if (process.env.DEBUG)
-    console.log.apply(console, arguments)
+    console.log.apply(console, ['DEBUG: ' + new Array(indent).join('-') + '|'].concat([].slice.call(arguments)))
 }
 
-Plan.prototype.eval =
+Plan.prototype.eval = function(exp) {
+  indent++
+  var ret = mEval.call(this, exp)
+  indent--
+  return ret
+}
+
 function mEval(exp) { var env = this /* jshint validthis:true */
   if (_.is_symbol(exp)) {
     debug('resolving symbol', exp)
-    return env.get(exp)
+    var ret = env.get(exp)
+    debug('returning', ret)
+    return ret
   }
   else if (_.is_list(exp)) {
     if (_.is_empty(exp)) {
@@ -24,11 +33,13 @@ function mEval(exp) { var env = this /* jshint validthis:true */
     }
     else {
       debug('evaluating fn', _.first(exp), 'with args', _.rest(exp))
-      return env.operate(env.eval(_.first(exp)), _.rest(exp))
+      var ret = env.operate(env.eval(_.first(exp)), _.rest(exp))
+      debug('returning', ret)
+      return ret
     }
   }
-  else if (_.is_vector(exp)) {
-    debug('evaluating vector', exp)
+  else if (_.is_seqable(exp)) {
+    debug('evaluating seqable', exp)
     return _.map(function(exp) { return env.eval(exp) }, exp)
   }
   else {
