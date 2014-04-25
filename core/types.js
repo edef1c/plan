@@ -2,6 +2,8 @@
 var _ = module.exports = Object.create(require('mori-plan'))
   , inspect = require('util').inspect
 
+_.is_nil = function(val) { return val === null }
+
 _.env = function() { return new Env() }
 _.is_env = function(obj) { return obj instanceof Env }
 
