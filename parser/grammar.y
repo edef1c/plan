@@ -35,7 +35,7 @@ e
     | vector
         {$$ = $1}
     | "'" e
-        {$$ = $2}
+        {$$ = yy.list(yy.symbol('quote'), $2)}
     | LITERAL
         {$$ = JSON.parse(yytext)}
     | IDENTIFIER
