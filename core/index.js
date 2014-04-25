@@ -15,9 +15,16 @@ function uncurry(fn) {
 }
 
 var Plan = module.exports = require('./evaluator')
+  , env = new Plan()
+
+env.set = function(symbol, value) {
+  return (this === env && symbol.toString()[0] !== '$')
+    ? Plan.prototype.set(symbol, value)
+    : Plan.prototype.set.call(this, symbol, value)
+}
 
 function introduce(identifier, value) {
-  Plan.prototype.set(_.symbol(identifier), value)
+  env.set(_.symbol(identifier), value)
 }
 
 introduce('#f', false)
@@ -39,7 +46,7 @@ introduce('eval'   , lambda(uncurry(Plan.prototype.eval)))
 introduce('operate', lambda(uncurry(Plan.prototype.operate)))
 
 introduce('bool', lambda(bool))
-introduce('vau', mVau)
+introduce('$vau', mVau)
 introduce('def', mDefine)
 
 function bool(cond, ifTrue, ifFalse) { var env = this /* jshint validthis:true */
@@ -77,7 +84,7 @@ var fs = require('fs')
   , code = require('../parser').parse(source)
 
 while (!_.is_empty(code)) {
-  Plan.prototype.eval(_.first(code))
+  env.eval(_.first(code))
   code = _.rest(code)
 }
 
